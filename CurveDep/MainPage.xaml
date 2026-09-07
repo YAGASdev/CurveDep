@@ -1,0 +1,273 @@
+﻿<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewmodels="clr-namespace:CurveDep.ViewModels"
+             xmlns:behaviors="clr-namespace:CurveDep.Behaviors"
+             xmlns:local="clr-namespace:CurveDep"
+             x:Class="CurveDep.MainPage">
+
+    <ContentPage.BindingContext>
+        <viewmodels:MVM />
+    </ContentPage.BindingContext>
+
+    <ScrollView>
+        <Grid RowDefinitions="45,35,20,Auto,Auto,Auto,Auto,1,30,30,70,10,50"
+              ColumnDefinitions="160,70,70,800"
+              RowSpacing="5"
+              ColumnSpacing="5"
+              Padding="15"
+              BackgroundColor="{Binding Source={x:Static local:ThemeManager.Instance}, Path=PageBackgroundColor}">
+
+            <!-- Заголовок -->
+            <Label Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="4"
+                   Text="Программа расчета кривой депрессии земляной плотины"
+                   HorizontalOptions="Center" VerticalOptions="Center"
+                   FontSize="16" FontAttributes="Bold"
+                   TextColor="{Binding Source={x:Static local:ThemeManager.Instance}, Path=TextColor}"/>
+
+            <!-- Кнопка переключения темы -->
+            <Button Grid.Row="0" Grid.Column="3"
+                    Text="{Binding Source={x:Static local:ThemeManager.Instance}, Path=ThemeButtonText}"
+                    BackgroundColor="{Binding Source={x:Static local:ThemeManager.Instance}, Path=ThemeButtonColor}"
+                    TextColor="{Binding Source={x:Static local:ThemeManager.Instance}, Path=TextColor}"
+                    BorderColor="Black" BorderWidth="1" FontAttributes="Bold" CornerRadius="10"
+                    HorizontalOptions="End" VerticalOptions="Center"
+                    WidthRequest="120" HeightRequest="30"
+                    Clicked="OnThemeToggleClicked"/>
+
+            <!-- Подзаголовок -->
+            <Label Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="4"
+                   Text="Введите исходные данные"
+                   HorizontalOptions="Center" VerticalOptions="Center"
+                   FontSize="16" FontAttributes="Bold"
+                   TextColor="{Binding Source={x:Static local:ThemeManager.Instance}, Path=TextColor}"/>
+            <!-- Строка Н1 -->
+            <Label Grid.Row="3" Grid.Column="0"
+                   Text="Глубина воды, Н1"
+                   VerticalOptions="Center"
+                   TextColor="{Binding Source={x:Static local:ThemeManager.Instance}, Path=TextColor}"/>
+
+            <Frame Grid.Row="3" Grid.Column="1"
+                   BackgroundColor="#9880e5" BorderColor="Black" CornerRadius="5"
+                   Padding="0" HasShadow="False" WidthRequest="67" HeightRequest="45">
+                <Entry WidthRequest="66" HeightRequest="44"
+                       Text="{Binding H1, Mode=TwoWay}"
+                       Keyboard="Numeric" Placeholder="0"
+                       HorizontalTextAlignment="Center" VerticalOptions="Center"
+                       BackgroundColor="#9880e5"
+                       TextColor="{Binding Source={x:Static local:ThemeManager.Instance}, Path=EntryTextColor}">
+                    <Entry.Behaviors>
+                        <behaviors:DecimalEntryBehavior />
+                    </Entry.Behaviors>
+                </Entry>
+            </Frame>
+
+            <Frame Grid.Row="3" Grid.Column="2"
+                   BackgroundColor="#9880e5" BorderColor="Black" CornerRadius="5"
+                   Padding="0" HasShadow="False" WidthRequest="67" HeightRequest="33">
+                <Stepper Value="{Binding H1, Mode=TwoWay}"
+                         Minimum="0" Maximum="100" Increment="0.1"
+                         HorizontalOptions="Center" VerticalOptions="Center"/>
+            </Frame>
+
+            <!-- Строка M1 -->
+            <Label Grid.Row="4" Grid.Column="0"
+                   Text="Заложение верхового откоса, m1"
+                   VerticalOptions="Center"
+                   TextColor="{Binding Source={x:Static local:ThemeManager.Instance}, Path=TextColor}"/>
+
+            <Frame Grid.Row="4" Grid.Column="1"
+                   BackgroundColor="#9880e5" BorderColor="Black" CornerRadius="5"
+                   Padding="0" HasShadow="False" WidthRequest="67" HeightRequest="45">
+                <Entry WidthRequest="66" HeightRequest="44"
+                       Text="{Binding M1, Mode=TwoWay}"
+                       Keyboard="Numeric" Placeholder="0"
+                       HorizontalTextAlignment="Center" VerticalOptions="Center"
+                       BackgroundColor="#9880e5"
+                       TextColor="{Binding Source={x:Static local:ThemeManager.Instance}, Path=EntryTextColor}">
+                    <Entry.Behaviors>
+                        <behaviors:DecimalEntryBehavior />
+                    </Entry.Behaviors>
+                </Entry>
+            </Frame>
+
+            <Frame Grid.Row="4" Grid.Column="2"
+                   BackgroundColor="#9880e5" BorderColor="Black" CornerRadius="5"
+                   Padding="0" HasShadow="False" WidthRequest="67" HeightRequest="33">
+                <Stepper Value="{Binding M1, Mode=TwoWay}"
+                         Minimum="0" Maximum="100" Increment="0.1"
+                         HorizontalOptions="Center" VerticalOptions="Center"/>
+            </Frame>
+
+            <!-- Строка L -->
+            <Label Grid.Row="5" Grid.Column="0"
+                   Text="Длина плотины от уреза нормального подпорного уровня, L"
+                   VerticalOptions="Center"
+                   TextColor="{Binding Source={x:Static local:ThemeManager.Instance}, Path=TextColor}"/>
+
+            <Frame Grid.Row="5" Grid.Column="1"
+                   BackgroundColor="#9880e5" BorderColor="Black" CornerRadius="5"
+                   Padding="0" HasShadow="False" WidthRequest="67" HeightRequest="45">
+                <Entry WidthRequest="66" HeightRequest="44"
+                       Text="{Binding L, Mode=TwoWay}"
+                       Keyboard="Numeric" Placeholder="0"
+                       HorizontalTextAlignment="Center" VerticalOptions="Center"
+                       BackgroundColor="#9880e5"
+                       TextColor="{Binding Source={x:Static local:ThemeManager.Instance}, Path=EntryTextColor}">
+                    <Entry.Behaviors>
+                        <behaviors:DecimalEntryBehavior />
+                    </Entry.Behaviors>
+                </Entry>
+            </Frame>
+
+            <Frame Grid.Row="5" Grid.Column="2"
+                   BackgroundColor="#9880e5" BorderColor="Black" CornerRadius="5"
+                   Padding="0" HasShadow="False" WidthRequest="67" HeightRequest="33">
+                <Stepper Value="{Binding L, Mode=TwoWay}"
+                         Minimum="0" Maximum="100" Increment="0.1"
+                         HorizontalOptions="Center" VerticalOptions="Center"/>
+            </Frame>
+
+            <!-- Строка Kt -->
+            <Label Grid.Row="6" Grid.Column="0"
+                   Text="Коэффициент фильтрации грунта тела плотины, Kt"
+                   VerticalOptions="Center"
+                   TextColor="{Binding Source={x:Static local:ThemeManager.Instance}, Path=TextColor}"/>
+
+            <Frame Grid.Row="6" Grid.Column="1"
+                   BackgroundColor="#9880e5" BorderColor="Black" CornerRadius="5"
+                   Padding="0" HasShadow="False" WidthRequest="67" HeightRequest="45">
+                <Entry WidthRequest="66" HeightRequest="44"
+                       Text="{Binding Kt, Mode=TwoWay}"
+                       Keyboard="Numeric" Placeholder="0"
+                       HorizontalTextAlignment="Center" VerticalOptions="Center"
+                       BackgroundColor="#9880e5"
+                       TextColor="{Binding Source={x:Static local:ThemeManager.Instance}, Path=EntryTextColor}">
+                    <Entry.Behaviors>
+                        <behaviors:DecimalEntryBehavior />
+                    </Entry.Behaviors>
+                </Entry>
+            </Frame>
+
+            <Frame Grid.Row="6" Grid.Column="2"
+                   BackgroundColor="#9880e5" BorderColor="Black" CornerRadius="5"
+                   Padding="0" HasShadow="False" WidthRequest="67" HeightRequest="33">
+                <Stepper Value="{Binding Kt, Mode=TwoWay}"
+                         Minimum="0" Maximum="100" Increment="0.1"
+                         HorizontalOptions="Center" VerticalOptions="Center"/>
+            </Frame>
+            <!-- Пустая строка для расстояния -->
+            <BoxView Grid.Row="7" Grid.Column="0" Grid.ColumnSpan="4" HeightRequest="20" Color="Transparent"/>
+
+            <!-- Надпись "результаты расчета" -->
+            <Label Grid.Row="8" Grid.Column="0" Grid.ColumnSpan="4"
+                   Text="Результаты расчета"
+                   HorizontalOptions="Center" VerticalOptions="Center"
+                   FontSize="16" FontAttributes="Bold"
+                   TextColor="{Binding Source={x:Static local:ThemeManager.Instance}, Path=TextColor}"/>
+
+            <!-- Строка с результатами -->
+            <Grid Grid.Row="9" Grid.Column="0" Grid.ColumnSpan="4"
+                  ColumnDefinitions="*,*,*,*,*"
+                  ColumnSpacing="10"
+                  HeightRequest="30">
+
+                <Frame Grid.Column="0" BackgroundColor="#9880e5" Padding="5" HasShadow="False" CornerRadius="5">
+                    <Label Text="{Binding Beta}" HorizontalOptions="Center" VerticalOptions="Center"
+                           TextColor="{Binding Source={x:Static local:ThemeManager.Instance}, Path=TextColor}"/>
+                </Frame>
+                <Frame Grid.Column="1" BackgroundColor="#9880e5" Padding="5" HasShadow="False" CornerRadius="5">
+                    <Label Text="{Binding DeltaLb}" HorizontalOptions="Center" VerticalOptions="Center"
+                           TextColor="{Binding Source={x:Static local:ThemeManager.Instance}, Path=TextColor}"/>
+                </Frame>
+                <Frame Grid.Column="2" BackgroundColor="#9880e5" Padding="5" HasShadow="False" CornerRadius="5">
+                    <Label Text="{Binding DeltaLp}" HorizontalOptions="Center" VerticalOptions="Center"
+                           TextColor="{Binding Source={x:Static local:ThemeManager.Instance}, Path=TextColor}"/>
+                </Frame>
+                <Frame Grid.Column="3" BackgroundColor="#9880e5" Padding="5" HasShadow="False" CornerRadius="5">
+                    <Label Text="{Binding Q}" HorizontalOptions="Center" VerticalOptions="Center"
+                           TextColor="{Binding Source={x:Static local:ThemeManager.Instance}, Path=TextColor}"/>
+                </Frame>
+                <Frame Grid.Column="4" BackgroundColor="#9880e5" Padding="5" HasShadow="False" CornerRadius="5">
+                    <Label Text="{Binding Ld}" HorizontalOptions="Center" VerticalOptions="Center"
+                           TextColor="{Binding Source={x:Static local:ThemeManager.Instance}, Path=TextColor}"/>
+                </Frame>
+            </Grid>
+
+            <!-- Таблица 8x2 -->
+            <Frame Grid.Row="10" Grid.Column="0" Grid.ColumnSpan="4"
+                   BackgroundColor="black" BorderColor="Black" CornerRadius="10"
+                   HasShadow="True" Padding="0">
+                <Grid RowDefinitions="33,33"
+                      ColumnDefinitions="140,140,140,140,140,140,140,140"
+                      RowSpacing="1" ColumnSpacing="1">
+
+                    <!-- Первая строка таблицы -->
+                    <Label Grid.Row="0" Grid.Column="0" Text="X, м" FontSize="20"
+                           BackgroundColor="#9880e5" HorizontalTextAlignment="Center" VerticalTextAlignment="Center"
+                           TextColor="{Binding Source={x:Static local:ThemeManager.Instance}, Path=TextColor}"/>
+                    <Label Grid.Row="0" Grid.Column="1" Text="{Binding TableHeaders[0]}"
+                           BackgroundColor="#9880e5" HorizontalTextAlignment="Center" VerticalTextAlignment="Center"
+                           TextColor="{Binding Source={x:Static local:ThemeManager.Instance}, Path=TextColor}"/>
+                    <Label Grid.Row="0" Grid.Column="2" Text="{Binding TableHeaders[1]}"
+                           BackgroundColor="#9880e5" HorizontalTextAlignment="Center" VerticalTextAlignment="Center"
+                           TextColor="{Binding Source={x:Static local:ThemeManager.Instance}, Path=TextColor}"/>
+                    <Label Grid.Row="0" Grid.Column="3" Text="{Binding TableHeaders[2]}"
+                           BackgroundColor="#9880e5" HorizontalTextAlignment="Center" VerticalTextAlignment="Center"
+                           TextColor="{Binding Source={x:Static local:ThemeManager.Instance}, Path=TextColor}"/>
+                    <Label Grid.Row="0" Grid.Column="4" Text="{Binding TableHeaders[3]}"
+                           BackgroundColor="#9880e5" HorizontalTextAlignment="Center" VerticalTextAlignment="Center"
+                           TextColor="{Binding Source={x:Static local:ThemeManager.Instance}, Path=TextColor}"/>
+                    <Label Grid.Row="0" Grid.Column="5" Text="{Binding TableHeaders[4]}"
+                           BackgroundColor="#9880e5" HorizontalTextAlignment="Center" VerticalTextAlignment="Center"
+                           TextColor="{Binding Source={x:Static local:ThemeManager.Instance}, Path=TextColor}"/>
+                    <Label Grid.Row="0" Grid.Column="6" Text="{Binding TableHeaders[5]}"
+                           BackgroundColor="#9880e5" HorizontalTextAlignment="Center" VerticalTextAlignment="Center"
+                           TextColor="{Binding Source={x:Static local:ThemeManager.Instance}, Path=TextColor}"/>
+                    <Label Grid.Row="0" Grid.Column="7" Text="{Binding TableHeaders[6]}"
+                           BackgroundColor="#9880e5" HorizontalTextAlignment="Center" VerticalTextAlignment="Center"
+                           TextColor="{Binding Source={x:Static local:ThemeManager.Instance}, Path=TextColor}"/>
+
+                    <!-- Вторая строка таблицы -->
+                    <Label Grid.Row="1" Grid.Column="0" Text="hₓ, v" FontSize="20"
+                           BackgroundColor="#9880e5" HorizontalTextAlignment="Center" VerticalTextAlignment="Center"
+                           TextColor="{Binding Source={x:Static local:ThemeManager.Instance}, Path=TextColor}"/>
+                    <Label Grid.Row="1" Grid.Column="1" Text="{Binding TableData[0]}"
+                           BackgroundColor="#9880e5" HorizontalTextAlignment="Center" VerticalTextAlignment="Center"
+                           TextColor="{Binding Source={x:Static local:ThemeManager.Instance}, Path=TextColor}"/>
+                    <Label Grid.Row="1" Grid.Column="2" Text="{Binding TableData[1]}"
+                           BackgroundColor="#9880e5" HorizontalTextAlignment="Center" VerticalTextAlignment="Center"
+                           TextColor="{Binding Source={x:Static local:ThemeManager.Instance}, Path=TextColor}"/>
+                    <Label Grid.Row="1" Grid.Column="3" Text="{Binding TableData[2]}"
+                           BackgroundColor="#9880e5" HorizontalTextAlignment="Center" VerticalTextAlignment="Center"
+                           TextColor="{Binding Source={x:Static local:ThemeManager.Instance}, Path=TextColor}"/>
+                    <Label Grid.Row="1" Grid.Column="4" Text="{Binding TableData[3]}"
+                           BackgroundColor="#9880e5" HorizontalTextAlignment="Center" VerticalTextAlignment="Center"
+                           TextColor="{Binding Source={x:Static local:ThemeManager.Instance}, Path=TextColor}"/>
+                    <Label Grid.Row="1" Grid.Column="5" Text="{Binding TableData[4]}"
+                           BackgroundColor="#9880e5" HorizontalTextAlignment="Center" VerticalTextAlignment="Center"
+                           TextColor="{Binding Source={x:Static local:ThemeManager.Instance}, Path=TextColor}"/>
+                    <Label Grid.Row="1" Grid.Column="6" Text="{Binding TableData[5]}"
+                           BackgroundColor="#9880e5" HorizontalTextAlignment="Center" VerticalTextAlignment="Center"
+                           TextColor="{Binding Source={x:Static local:ThemeManager.Instance}, Path=TextColor}"/>
+                    <Label Grid.Row="1" Grid.Column="7" Text="{Binding TableData[6]}"
+                           BackgroundColor="#9880e5" HorizontalTextAlignment="Center" VerticalTextAlignment="Center"
+                           TextColor="{Binding Source={x:Static local:ThemeManager.Instance}, Path=TextColor}"/>
+                </Grid>
+            </Frame>
+            <!-- Кнопка Продолжить -->
+            <Button x:Name="CalculateButton"
+                    Grid.Row="12" Grid.Column="0" Grid.ColumnSpan="8"
+                    Text="Продолжить"
+                    Command="{Binding CalculateCommand}"
+                    BackgroundColor="#9880e5"
+                    TextColor="{Binding Source={x:Static local:ThemeManager.Instance}, Path=TextColor}"
+                    BorderWidth="1" BorderColor="Black"
+                    FontAttributes="Bold" CornerRadius="10"
+                    HorizontalOptions="Center" VerticalOptions="Center"
+                    WidthRequest="150" HeightRequest="40"
+                    Pressed="OnButtonPressed"
+                    Released="OnButtonReleased"/>
+
+        </Grid>
+    </ScrollView>
+</ContentPage>
