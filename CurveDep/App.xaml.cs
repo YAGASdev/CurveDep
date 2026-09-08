@@ -1,6 +1,4 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-
-namespace CurveDep
+﻿namespace CurveDep
 {
     public partial class App : Application
     {
@@ -11,7 +9,15 @@ namespace CurveDep
 
         protected override Window CreateWindow(IActivationState? activationState)
         {
-            return new Window(new AppShell());
+            var window = new Window(new AppShell())
+            {
+                Width = 1160,
+                Height = 650,
+                MinimumWidth = 1160,
+                MinimumHeight = 650
+            };
+
+            return window;
         }
     }
 }

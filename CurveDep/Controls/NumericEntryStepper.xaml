@@ -1,0 +1,43 @@
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:behaviors="clr-namespace:CurveDep.Behaviors"
+             xmlns:local="clr-namespace:CurveDep"
+             x:Class="CurveDep.Controls.NumericEntryStepper"
+             x:Name="Root">
+
+    <Grid ColumnDefinitions="160,70,70" ColumnSpacing="5">
+
+        <Label Grid.Column="0"
+               Text="{Binding LabelText, Source={x:Reference Root}}"
+               VerticalOptions="Center"
+               TextColor="{Binding Source={x:Static local:ThemeManager.Instance}, Path=TextColor}"/>
+
+        <Border Grid.Column="1"
+                BackgroundColor="#9880e5" Stroke="Black" StrokeShape="RoundRectangle 5"
+                StrokeThickness="1"
+                Padding="0" WidthRequest="67" HeightRequest="45">
+            <Entry HorizontalOptions="Fill" VerticalOptions="Fill"
+                   Text="{Binding Value, Source={x:Reference Root}, Mode=TwoWay}"
+                   Keyboard="Numeric" Placeholder="0"
+                   HorizontalTextAlignment="Center"
+                   BackgroundColor="#9880e5"
+                   TextColor="{Binding Source={x:Static local:ThemeManager.Instance}, Path=EntryTextColor}">
+                <Entry.Behaviors>
+                    <behaviors:DecimalEntryBehavior />
+                </Entry.Behaviors>
+            </Entry>
+        </Border>
+
+        <Border Grid.Column="2"
+                BackgroundColor="#9880e5" Stroke="Black" StrokeShape="RoundRectangle 5"
+                StrokeThickness="1"
+                Padding="0" WidthRequest="67" HeightRequest="33">
+            <Stepper Value="{Binding Value, Source={x:Reference Root}, Mode=TwoWay}"
+                     Minimum="{Binding Minimum, Source={x:Reference Root}}"
+                     Maximum="{Binding Maximum, Source={x:Reference Root}}"
+                     Increment="{Binding Increment, Source={x:Reference Root}}"
+                     HorizontalOptions="Center" VerticalOptions="Center"/>
+        </Border>
+
+    </Grid>
+</ContentView>

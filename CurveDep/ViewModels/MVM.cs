@@ -1,77 +1,109 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using CurveDep.Services;
 using System.Globalization;
 
 namespace CurveDep.ViewModels
 {
     public partial class MVM : ObservableObject
     {
-        // Поля для входных данных
-        private double _h1 = 9.5;
-        public double H1
-        {
-            get => _h1;
-            set => SetProperty(ref _h1, value);
-        }
+        private readonly SeepageCurveCalculator _calculator = new();
 
-        private double _m1 = 3;
-        public double M1
-        {
-            get => _m1;
-            set => SetProperty(ref _m1, value);
-        }
-
-        private double _l = 24.3;
-        public double L
-        {
-            get => _l;
-            set => SetProperty(ref _l, value);
-        }
-
-        private double _kt = 1.21;
-        public double Kt
-        {
-            get => _kt;
-            set => SetProperty(ref _kt, value);
-        }
-
-        // Поля для результатов расчета
-        [ObservableProperty]
-        private string beta = "β = 0";
+        // ===== Входные данные =====
 
         [ObservableProperty]
-        private string deltaLb = "ΔLb = 0, м";
+        public partial double H1 { get; set; } = 9.5;
 
         [ObservableProperty]
-        private string deltaLp = "ΔLp = 0, м";
+        public partial double M1 { get; set; } = 3;
 
         [ObservableProperty]
-        private string q = "q = 0, м/сут";
+        public partial double L { get; set; } = 24.3;
 
         [ObservableProperty]
-        private string ld = "Lδ = 0, м";
+        public partial double Kt { get; set; } = 1.21;
 
-        // Данные для таблицы
-        [ObservableProperty]
-        private string[] tableHeaders = new[] { "0", "5", "10", "15", "20", "22", "24" };
+        // ===== Результаты расчёта (чистые числа, форматирование — в XAML) =====
 
         [ObservableProperty]
-        private string[] tableData = new[] { "0.00", "0.00", "0.00", "0.00", "0.00", "0.00", "0.00" };
+        public partial double BetaValue { get; set; }
 
-        // Вычисленные значения для использования в расчетах
-        private double _bv;
-        private double _deltaLv;
-        private double _deltaLr;
-        private double _qValue;
-        private double _ldValue;
+        [ObservableProperty]
+        public partial double DeltaLbValue { get; set; }
+
+        [ObservableProperty]
+        public partial double DeltaLpValue { get; set; }
+
+        [ObservableProperty]
+        public partial double QValue { get; set; }
+
+        [ObservableProperty]
+        public partial double LdValue { get; set; }
+
+        // ===== Валидация =====
+
+        [ObservableProperty]
+        public partial string ErrorMessage { get; set; } = string.Empty;
+
+        [ObservableProperty]
+        public partial bool HasError { get; set; }
+
+        // ===== Данные для таблицы =====
+
+        [ObservableProperty]
+        public partial string[] TableHeaders { get; set; } =
+            new[] { "0", "5", "10", "15", "20", "22", "24" };
+
+        [ObservableProperty]
+        public partial string[] TableData { get; set; } =
+            new[] { "0.00", "0.00", "0.00", "0.00", "0.00", "0.00", "0.00" };
 
         [RelayCommand]
         private void Calculate()
         {
-            // Обновляем таблицу и выполняем расчеты только по нажатию кнопки
+            if (!ValidateInputs(out string error))
+            {
+                ErrorMessage = error;
+                HasError = true;
+                return;
+            }
+
+            HasError = false;
+            ErrorMessage = string.Empty;
+
             UpdateTableHeaders();
             PerformCalculations();
             UpdateTableData();
+        }
+
+        private bool ValidateInputs(out string error)
+        {
+            if (H1 <= 0)
+            {
+                error = "Глубина воды Н1 должна быть больше нуля.";
+                return false;
+            }
+
+            if (M1 <= 0)
+            {
+                error = "Заложение откоса m1 должно быть больше нуля.";
+                return false;
+            }
+
+            if (L <= 0)
+            {
+                error = "Длина плотины L должна быть больше нуля.";
+                return false;
+            }
+
+            if (Kt <= 0)
+            {
+                error = "Коэффициент фильтрации Kt должен быть больше нуля.";
+                return false;
+            }
+
+            error = string.Empty;
+            return true;
         }
 
         private void UpdateTableHeaders()
@@ -81,10 +113,8 @@ namespace CurveDep.ViewModels
 
         private string[] GenerateTableValues(double lValue)
         {
-            // Округляем L до ближайшего целого в меньшую сторону
             int lastValue = (int)Math.Floor(lValue);
 
-            // Для очень маленьких значений используем простой подход
             if (lastValue < 6)
             {
                 return GenerateTableForSmallValues(lastValue);
@@ -92,21 +122,17 @@ namespace CurveDep.ViewModels
 
             var values = new HashSet<double> { 0 };
 
-            // Добавляем обязательные значения 5, 10, 15 если они помещаются
             if (5 <= lastValue) values.Add(5);
             if (10 <= lastValue) values.Add(10);
             if (15 <= lastValue) values.Add(15);
 
-            // Добавляем последнее значение
             values.Add(lastValue);
 
-            // Если последнее значение >= 17, добавляем "последнее число минус 1"
             if (lastValue >= 17 && !values.Contains(lastValue - 1))
             {
                 values.Add(lastValue - 1);
             }
 
-            // Добавляем промежуточные значения пока не наберем 7
             int maxIterations = 10;
             int iteration = 0;
 
@@ -114,7 +140,6 @@ namespace CurveDep.ViewModels
             {
                 iteration++;
 
-                // Находим самый большой интервал
                 var sortedValues = values.OrderBy(v => v).ToList();
                 double maxGap = 0;
                 int gapIndex = -1;
@@ -147,7 +172,6 @@ namespace CurveDep.ViewModels
                 }
             }
 
-            // Если все еще меньше 7 значений, добавляем последовательные числа
             if (values.Count < 7)
             {
                 for (int i = 0; i <= lastValue && values.Count < 7; i++)
@@ -156,16 +180,13 @@ namespace CurveDep.ViewModels
                 }
             }
 
-            // Сортируем и берем ровно 7 значений
             var result = values.OrderBy(v => v).Take(7).ToList();
 
-            // Гарантируем, что последнее значение равно lastValue
             if (result.Count > 0 && result[^1] != lastValue)
             {
                 result[^1] = lastValue;
             }
 
-            // Если все еще меньше 7 значений, используем fallback
             if (result.Count < 7)
             {
                 return GenerateTableForSmallValues(lastValue);
@@ -176,12 +197,10 @@ namespace CurveDep.ViewModels
 
         private string[] GenerateTableForSmallValues(int lastValue)
         {
-            // Для маленьких значений просто создаем последовательность от 0 до lastValue
             var values = new List<double>();
 
             if (lastValue >= 6)
             {
-                // Для значений от 6 и выше
                 for (int i = 0; i <= lastValue && values.Count < 7; i++)
                 {
                     values.Add(i);
@@ -189,7 +208,6 @@ namespace CurveDep.ViewModels
             }
             else
             {
-                // Для очень маленьких значений (0-5) используем дробные числа
                 double step = lastValue / 6.0;
                 for (int i = 0; i < 7; i++)
                 {
@@ -198,14 +216,12 @@ namespace CurveDep.ViewModels
                     values.Add(value);
                 }
 
-                // Гарантируем, что последнее значение равно lastValue
                 if (values.Count > 0)
                 {
                     values[^1] = lastValue;
                 }
             }
 
-            // Форматируем вывод
             return values.Select(v => v % 1 == 0 ? v.ToString("0") : v.ToString("0.0")).ToArray();
         }
 
@@ -213,53 +229,26 @@ namespace CurveDep.ViewModels
         {
             try
             {
-                // Округляем входные данные до 2 знаков после запятой
-                double h1 = Math.Round(H1, 2);
-                double m1 = Math.Round(M1, 2);
-                double l = Math.Round(L, 2);
-                double kt = Math.Round(Kt, 2);
+                _calculator.H1 = H1;
+                _calculator.M1 = M1;
+                _calculator.L = L;
+                _calculator.Kt = Kt;
 
-                // Вычисление Bv (β)
-                _bv = Math.Round(m1 / (2 * m1 + 1), 2);
-                Beta = $"β = {_bv:F2}";
+                var result = _calculator.Calculate();
 
-                // Вычисление deltaLv (ΔLb)
-                _deltaLv = Math.Round(_bv * h1, 2);
-                DeltaLb = $"ΔLb = {_deltaLv:F2}, м";
-
-                // Вычисление deltaLr (ΔLp)
-                _deltaLr = Math.Round(l + _deltaLv, 2);
-                DeltaLp = $"ΔLp = {_deltaLr:F2}, м";
-
-                // Вычисление q
-                _qValue = Math.Round((h1 * h1) / (2 * _deltaLr) * kt, 2);
-                Q = $"q = {_qValue:F2}, м/сут";
-
-                // Вычисление Ld (Lδ)
-                _ldValue = Math.Round((0.5 * _qValue) / kt, 2);
-                Ld = $"Lδ = {_ldValue:F2}, м";
+                BetaValue = result.Beta;
+                DeltaLbValue = result.DeltaLb;
+                DeltaLpValue = result.DeltaLp;
+                QValue = result.Q;
+                LdValue = result.Ld;
             }
             catch (Exception)
             {
-                // В случае ошибки сбрасываем значения
-                Beta = "β = 0";
-                DeltaLb = "ΔLb = 0, м";
-                DeltaLp = "ΔLp = 0, м";
-                Q = "q = 0, м/сут";
-                Ld = "Lδ = 0, м";
-            }
-        }
-
-        private double CalculateHx(double x)
-        {
-            try
-            {
-                double result = Math.Sqrt(2 * (_qValue / Kt) * (L - x + _ldValue));
-                return Math.Round(result, 2);
-            }
-            catch (Exception)
-            {
-                return 0.0;
+                BetaValue = 0;
+                DeltaLbValue = 0;
+                DeltaLpValue = 0;
+                QValue = 0;
+                LdValue = 0;
             }
         }
 
@@ -267,7 +256,6 @@ namespace CurveDep.ViewModels
         {
             try
             {
-                // Преобразуем заголовки таблицы в числа для расчетов
                 var xValues = TableHeaders.Select(header =>
                     double.Parse(header, CultureInfo.InvariantCulture)).ToArray();
 
@@ -276,7 +264,7 @@ namespace CurveDep.ViewModels
                 for (int i = 0; i < xValues.Length && i < 7; i++)
                 {
                     double x = xValues[i];
-                    double hx = CalculateHx(x);
+                    double hx = _calculator.CalculateHx(x);
                     newTableData[i] = hx.ToString("F2", CultureInfo.InvariantCulture);
                 }
 

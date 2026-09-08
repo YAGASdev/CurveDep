@@ -2,6 +2,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:viewmodels="clr-namespace:CurveDep.ViewModels"
              xmlns:behaviors="clr-namespace:CurveDep.Behaviors"
+             xmlns:controls="clr-namespace:CurveDep.Controls"
              xmlns:local="clr-namespace:CurveDep"
              x:Class="CurveDep.MainPage">
 
@@ -10,7 +11,7 @@
     </ContentPage.BindingContext>
 
     <ScrollView>
-        <Grid RowDefinitions="45,35,20,Auto,Auto,Auto,Auto,1,30,30,70,10,50"
+        <Grid RowDefinitions="45,35,20,Auto,Auto,Auto,Auto,1,30,30,70,30,50"
               ColumnDefinitions="160,70,70,800"
               RowSpacing="5"
               ColumnSpacing="5"
@@ -40,121 +41,28 @@
                    HorizontalOptions="Center" VerticalOptions="Center"
                    FontSize="16" FontAttributes="Bold"
                    TextColor="{Binding Source={x:Static local:ThemeManager.Instance}, Path=TextColor}"/>
-            <!-- Строка Н1 -->
-            <Label Grid.Row="3" Grid.Column="0"
-                   Text="Глубина воды, Н1"
-                   VerticalOptions="Center"
-                   TextColor="{Binding Source={x:Static local:ThemeManager.Instance}, Path=TextColor}"/>
 
-            <Frame Grid.Row="3" Grid.Column="1"
-                   BackgroundColor="#9880e5" BorderColor="Black" CornerRadius="5"
-                   Padding="0" HasShadow="False" WidthRequest="67" HeightRequest="45">
-                <Entry WidthRequest="66" HeightRequest="44"
-                       Text="{Binding H1, Mode=TwoWay}"
-                       Keyboard="Numeric" Placeholder="0"
-                       HorizontalTextAlignment="Center" VerticalOptions="Center"
-                       BackgroundColor="#9880e5"
-                       TextColor="{Binding Source={x:Static local:ThemeManager.Instance}, Path=EntryTextColor}">
-                    <Entry.Behaviors>
-                        <behaviors:DecimalEntryBehavior />
-                    </Entry.Behaviors>
-                </Entry>
-            </Frame>
+            <!-- Поля ввода -->
+            <controls:NumericEntryStepper Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="3"
+                                           LabelText="Глубина воды, Н1"
+                                           Value="{Binding H1, Mode=TwoWay}"
+                                           Minimum="0.1" Maximum="100" Increment="0.1"/>
 
-            <Frame Grid.Row="3" Grid.Column="2"
-                   BackgroundColor="#9880e5" BorderColor="Black" CornerRadius="5"
-                   Padding="0" HasShadow="False" WidthRequest="67" HeightRequest="33">
-                <Stepper Value="{Binding H1, Mode=TwoWay}"
-                         Minimum="0" Maximum="100" Increment="0.1"
-                         HorizontalOptions="Center" VerticalOptions="Center"/>
-            </Frame>
+            <controls:NumericEntryStepper Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="3"
+                                           LabelText="Заложение верхового откоса, m1"
+                                           Value="{Binding M1, Mode=TwoWay}"
+                                           Minimum="0.1" Maximum="100" Increment="0.1"/>
 
-            <!-- Строка M1 -->
-            <Label Grid.Row="4" Grid.Column="0"
-                   Text="Заложение верхового откоса, m1"
-                   VerticalOptions="Center"
-                   TextColor="{Binding Source={x:Static local:ThemeManager.Instance}, Path=TextColor}"/>
+            <controls:NumericEntryStepper Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="3"
+                                           LabelText="Длина плотины от уреза нормального подпорного уровня, L"
+                                           Value="{Binding L, Mode=TwoWay}"
+                                           Minimum="0.1" Maximum="100" Increment="0.1"/>
 
-            <Frame Grid.Row="4" Grid.Column="1"
-                   BackgroundColor="#9880e5" BorderColor="Black" CornerRadius="5"
-                   Padding="0" HasShadow="False" WidthRequest="67" HeightRequest="45">
-                <Entry WidthRequest="66" HeightRequest="44"
-                       Text="{Binding M1, Mode=TwoWay}"
-                       Keyboard="Numeric" Placeholder="0"
-                       HorizontalTextAlignment="Center" VerticalOptions="Center"
-                       BackgroundColor="#9880e5"
-                       TextColor="{Binding Source={x:Static local:ThemeManager.Instance}, Path=EntryTextColor}">
-                    <Entry.Behaviors>
-                        <behaviors:DecimalEntryBehavior />
-                    </Entry.Behaviors>
-                </Entry>
-            </Frame>
+            <controls:NumericEntryStepper Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="3"
+                                           LabelText="Коэффициент фильтрации грунта тела плотины, Kt"
+                                           Value="{Binding Kt, Mode=TwoWay}"
+                                           Minimum="0.01" Maximum="100" Increment="0.1"/>
 
-            <Frame Grid.Row="4" Grid.Column="2"
-                   BackgroundColor="#9880e5" BorderColor="Black" CornerRadius="5"
-                   Padding="0" HasShadow="False" WidthRequest="67" HeightRequest="33">
-                <Stepper Value="{Binding M1, Mode=TwoWay}"
-                         Minimum="0" Maximum="100" Increment="0.1"
-                         HorizontalOptions="Center" VerticalOptions="Center"/>
-            </Frame>
-
-            <!-- Строка L -->
-            <Label Grid.Row="5" Grid.Column="0"
-                   Text="Длина плотины от уреза нормального подпорного уровня, L"
-                   VerticalOptions="Center"
-                   TextColor="{Binding Source={x:Static local:ThemeManager.Instance}, Path=TextColor}"/>
-
-            <Frame Grid.Row="5" Grid.Column="1"
-                   BackgroundColor="#9880e5" BorderColor="Black" CornerRadius="5"
-                   Padding="0" HasShadow="False" WidthRequest="67" HeightRequest="45">
-                <Entry WidthRequest="66" HeightRequest="44"
-                       Text="{Binding L, Mode=TwoWay}"
-                       Keyboard="Numeric" Placeholder="0"
-                       HorizontalTextAlignment="Center" VerticalOptions="Center"
-                       BackgroundColor="#9880e5"
-                       TextColor="{Binding Source={x:Static local:ThemeManager.Instance}, Path=EntryTextColor}">
-                    <Entry.Behaviors>
-                        <behaviors:DecimalEntryBehavior />
-                    </Entry.Behaviors>
-                </Entry>
-            </Frame>
-
-            <Frame Grid.Row="5" Grid.Column="2"
-                   BackgroundColor="#9880e5" BorderColor="Black" CornerRadius="5"
-                   Padding="0" HasShadow="False" WidthRequest="67" HeightRequest="33">
-                <Stepper Value="{Binding L, Mode=TwoWay}"
-                         Minimum="0" Maximum="100" Increment="0.1"
-                         HorizontalOptions="Center" VerticalOptions="Center"/>
-            </Frame>
-
-            <!-- Строка Kt -->
-            <Label Grid.Row="6" Grid.Column="0"
-                   Text="Коэффициент фильтрации грунта тела плотины, Kt"
-                   VerticalOptions="Center"
-                   TextColor="{Binding Source={x:Static local:ThemeManager.Instance}, Path=TextColor}"/>
-
-            <Frame Grid.Row="6" Grid.Column="1"
-                   BackgroundColor="#9880e5" BorderColor="Black" CornerRadius="5"
-                   Padding="0" HasShadow="False" WidthRequest="67" HeightRequest="45">
-                <Entry WidthRequest="66" HeightRequest="44"
-                       Text="{Binding Kt, Mode=TwoWay}"
-                       Keyboard="Numeric" Placeholder="0"
-                       HorizontalTextAlignment="Center" VerticalOptions="Center"
-                       BackgroundColor="#9880e5"
-                       TextColor="{Binding Source={x:Static local:ThemeManager.Instance}, Path=EntryTextColor}">
-                    <Entry.Behaviors>
-                        <behaviors:DecimalEntryBehavior />
-                    </Entry.Behaviors>
-                </Entry>
-            </Frame>
-
-            <Frame Grid.Row="6" Grid.Column="2"
-                   BackgroundColor="#9880e5" BorderColor="Black" CornerRadius="5"
-                   Padding="0" HasShadow="False" WidthRequest="67" HeightRequest="33">
-                <Stepper Value="{Binding Kt, Mode=TwoWay}"
-                         Minimum="0" Maximum="100" Increment="0.1"
-                         HorizontalOptions="Center" VerticalOptions="Center"/>
-            </Frame>
             <!-- Пустая строка для расстояния -->
             <BoxView Grid.Row="7" Grid.Column="0" Grid.ColumnSpan="4" HeightRequest="20" Color="Transparent"/>
 
@@ -171,37 +79,36 @@
                   ColumnSpacing="10"
                   HeightRequest="30">
 
-                <Frame Grid.Column="0" BackgroundColor="#9880e5" Padding="5" HasShadow="False" CornerRadius="5">
-                    <Label Text="{Binding Beta}" HorizontalOptions="Center" VerticalOptions="Center"
+                <Border Grid.Column="0" BackgroundColor="#9880e5" Stroke="Black" StrokeShape="RoundRectangle 5" Padding="5">
+                    <Label Text="{Binding BetaValue, StringFormat='β = {0:F2}'}" HorizontalOptions="Center" VerticalOptions="Center"
                            TextColor="{Binding Source={x:Static local:ThemeManager.Instance}, Path=TextColor}"/>
-                </Frame>
-                <Frame Grid.Column="1" BackgroundColor="#9880e5" Padding="5" HasShadow="False" CornerRadius="5">
-                    <Label Text="{Binding DeltaLb}" HorizontalOptions="Center" VerticalOptions="Center"
+                </Border>
+                <Border Grid.Column="1" BackgroundColor="#9880e5" Stroke="Black" StrokeShape="RoundRectangle 5" Padding="5">
+                    <Label Text="{Binding DeltaLbValue, StringFormat='ΔLb = {0:F2} м'}" HorizontalOptions="Center" VerticalOptions="Center"
                            TextColor="{Binding Source={x:Static local:ThemeManager.Instance}, Path=TextColor}"/>
-                </Frame>
-                <Frame Grid.Column="2" BackgroundColor="#9880e5" Padding="5" HasShadow="False" CornerRadius="5">
-                    <Label Text="{Binding DeltaLp}" HorizontalOptions="Center" VerticalOptions="Center"
+                </Border>
+                <Border Grid.Column="2" BackgroundColor="#9880e5" Stroke="Black" StrokeShape="RoundRectangle 5" Padding="5">
+                    <Label Text="{Binding DeltaLpValue, StringFormat='ΔLp = {0:F2} м'}" HorizontalOptions="Center" VerticalOptions="Center"
                            TextColor="{Binding Source={x:Static local:ThemeManager.Instance}, Path=TextColor}"/>
-                </Frame>
-                <Frame Grid.Column="3" BackgroundColor="#9880e5" Padding="5" HasShadow="False" CornerRadius="5">
-                    <Label Text="{Binding Q}" HorizontalOptions="Center" VerticalOptions="Center"
+                </Border>
+                <Border Grid.Column="3" BackgroundColor="#9880e5" Stroke="Black" StrokeShape="RoundRectangle 5" Padding="5">
+                    <Label Text="{Binding QValue, StringFormat='q = {0:F2} м/сут'}" HorizontalOptions="Center" VerticalOptions="Center"
                            TextColor="{Binding Source={x:Static local:ThemeManager.Instance}, Path=TextColor}"/>
-                </Frame>
-                <Frame Grid.Column="4" BackgroundColor="#9880e5" Padding="5" HasShadow="False" CornerRadius="5">
-                    <Label Text="{Binding Ld}" HorizontalOptions="Center" VerticalOptions="Center"
+                </Border>
+                <Border Grid.Column="4" BackgroundColor="#9880e5" Stroke="Black" StrokeShape="RoundRectangle 5" Padding="5">
+                    <Label Text="{Binding LdValue, StringFormat='Lδ = {0:F2} м'}" HorizontalOptions="Center" VerticalOptions="Center"
                            TextColor="{Binding Source={x:Static local:ThemeManager.Instance}, Path=TextColor}"/>
-                </Frame>
+                </Border>
             </Grid>
 
             <!-- Таблица 8x2 -->
-            <Frame Grid.Row="10" Grid.Column="0" Grid.ColumnSpan="4"
-                   BackgroundColor="black" BorderColor="Black" CornerRadius="10"
-                   HasShadow="True" Padding="0">
+            <Border Grid.Row="10" Grid.Column="0" Grid.ColumnSpan="4"
+                    BackgroundColor="black" Stroke="Black" StrokeShape="RoundRectangle 10"
+                    Padding="0">
                 <Grid RowDefinitions="33,33"
                       ColumnDefinitions="140,140,140,140,140,140,140,140"
                       RowSpacing="1" ColumnSpacing="1">
 
-                    <!-- Первая строка таблицы -->
                     <Label Grid.Row="0" Grid.Column="0" Text="X, м" FontSize="20"
                            BackgroundColor="#9880e5" HorizontalTextAlignment="Center" VerticalTextAlignment="Center"
                            TextColor="{Binding Source={x:Static local:ThemeManager.Instance}, Path=TextColor}"/>
@@ -227,7 +134,6 @@
                            BackgroundColor="#9880e5" HorizontalTextAlignment="Center" VerticalTextAlignment="Center"
                            TextColor="{Binding Source={x:Static local:ThemeManager.Instance}, Path=TextColor}"/>
 
-                    <!-- Вторая строка таблицы -->
                     <Label Grid.Row="1" Grid.Column="0" Text="hₓ, v" FontSize="20"
                            BackgroundColor="#9880e5" HorizontalTextAlignment="Center" VerticalTextAlignment="Center"
                            TextColor="{Binding Source={x:Static local:ThemeManager.Instance}, Path=TextColor}"/>
@@ -253,7 +159,17 @@
                            BackgroundColor="#9880e5" HorizontalTextAlignment="Center" VerticalTextAlignment="Center"
                            TextColor="{Binding Source={x:Static local:ThemeManager.Instance}, Path=TextColor}"/>
                 </Grid>
-            </Frame>
+            </Border>
+
+            <!-- Сообщение об ошибке валидации -->
+            <Label Grid.Row="11" Grid.Column="0" Grid.ColumnSpan="4"
+                   Text="{Binding ErrorMessage}"
+                   IsVisible="{Binding HasError}"
+                   TextColor="Red"
+                   FontAttributes="Bold"
+                   HorizontalOptions="Center"
+                   VerticalOptions="Center"/>
+
             <!-- Кнопка Продолжить -->
             <Button x:Name="CalculateButton"
                     Grid.Row="12" Grid.Column="0" Grid.ColumnSpan="8"
