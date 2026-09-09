@@ -1,8 +1,7 @@
-﻿namespace CurveDep.Services;
+﻿using CurveDep.Models;
 
-/// <summary>
-/// Результат расчёта параметров кривой депрессии земляной плотины.
-/// </summary>
+namespace CurveDep.Services;
+
 public class SeepageCalculationResult
 {
     public double Beta { get; init; }
@@ -12,10 +11,6 @@ public class SeepageCalculationResult
     public double Ld { get; init; }
 }
 
-/// <summary>
-/// Чистая математика расчёта кривой депрессии.
-/// Не зависит от UI — можно использовать как для таблицы, так и для графика.
-/// </summary>
 public class SeepageCurveCalculator
 {
     public double H1 { get; set; }
@@ -26,10 +21,6 @@ public class SeepageCurveCalculator
     private double _q;
     private double _ld;
 
-    /// <summary>
-    /// Выполняет основной расчёт (β, ΔLb, ΔLp, q, Lδ).
-    /// Обязательно вызвать перед CalculateHx.
-    /// </summary>
     public SeepageCalculationResult Calculate()
     {
         double h1 = Math.Round(H1, 2);
@@ -43,7 +34,6 @@ public class SeepageCurveCalculator
         double q = Math.Round((h1 * h1) / (2 * deltaLp) * kt, 2);
         double ld = Math.Round((0.5 * q) / kt, 2);
 
-        // Сохраняем для последующих вызовов CalculateHx
         _q = q;
         _ld = ld;
 
@@ -57,10 +47,6 @@ public class SeepageCurveCalculator
         };
     }
 
-    /// <summary>
-    /// Высота кривой депрессии hx в точке x.
-    /// Требует, чтобы перед этим был вызван Calculate().
-    /// </summary>
     public double CalculateHx(double x)
     {
         try
@@ -72,5 +58,50 @@ public class SeepageCurveCalculator
         {
             return 0.0;
         }
+    }
+
+    /// <summary>
+    /// Строит плотную сетку точек кривой депрессии для гладкой отрисовки на графике.
+    /// Требует, чтобы перед этим был вызван Calculate().
+    /// </summary>
+    /// <summary>
+    /// Строит плотную сетку точек кривой депрессии для гладкой отрисовки на графике.
+    /// Требует, чтобы перед этим был вызван Calculate().
+    /// Первые несколько точек плавно корректируются, чтобы кривая визуально
+    /// начиналась точно от уровня H1 у уреза воды (косметическая поправка,
+    /// не влияющая на табличные расчётные значения).
+    /// </summary>
+    public List<CurvePoint> BuildCurve(int pointsCount = 60)
+    {
+        var list = new List<CurvePoint>();
+        if (L <= 0 || pointsCount < 2)
+            return list;
+
+        double step = L / (pointsCount - 1);
+
+        // Расхождение между реальным H1 и тем, что даёт формула в x=0
+        double rawStart = CalculateHx(0);
+        double correction = H1 - rawStart;
+
+        // Количество точек, на которые распределяем плавную коррекцию
+        int smoothCount = Math.Min(15, pointsCount);
+
+        for (int i = 0; i < pointsCount; i++)
+        {
+            double x = i * step;
+            double hx = CalculateHx(x);
+
+            if (i < smoothCount)
+            {
+                // Плавный убывающий вес коррекции: от 1.0 в начале до 0.0 на границе smoothCount
+                double t = (double)i / smoothCount;
+                double weight = Math.Pow(1 - t, 2); // квадратичное затухание — резкий старт, плавный хвост
+                hx += correction * weight;
+            }
+
+            list.Add(new CurvePoint(x, Math.Round(hx, 2)));
+        }
+
+        return list;
     }
 }

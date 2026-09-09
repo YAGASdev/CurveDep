@@ -63,6 +63,15 @@
                                            Value="{Binding Kt, Mode=TwoWay}"
                                            Minimum="0.01" Maximum="100" Increment="0.1"/>
 
+            <!-- Схема плотины с кривой депрессии -->
+            <controls:DamCurveCanvasView Grid.Row="3" Grid.Column="3" Grid.RowSpan="4"
+                                          H1="{Binding DrawH1}"
+                                          M1="{Binding DrawM1}"
+                                          L="{Binding DrawL}"
+                                          CurvePoints="{Binding CurvePoints}"
+                                          HeightRequest="400"
+                                          WidthRequest="800"/>
+
             <!-- Пустая строка для расстояния -->
             <BoxView Grid.Row="7" Grid.Column="0" Grid.ColumnSpan="4" HeightRequest="20" Color="Transparent"/>
 

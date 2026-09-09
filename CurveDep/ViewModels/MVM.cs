@@ -1,5 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using CurveDep.Models;
 using CurveDep.Services;
 using System.Globalization;
 
@@ -9,7 +10,14 @@ namespace CurveDep.ViewModels
     {
         private readonly SeepageCurveCalculator _calculator = new();
 
-        // ===== Входные данные =====
+        public MVM()
+        {
+            // Выполняем первый расчёт сразу при запуске, чтобы график и профиль
+            // отображались корректно ещё до первого нажатия "Продолжить".
+            Calculate();
+        }
+
+        // ===== Входные данные (изменяются пользователем "вживую") =====
 
         [ObservableProperty]
         public partial double H1 { get; set; } = 9.5;
@@ -22,6 +30,18 @@ namespace CurveDep.ViewModels
 
         [ObservableProperty]
         public partial double Kt { get; set; } = 1.21;
+
+        // ===== "Снимок" данных, зафиксированный на момент последнего успешного расчёта =====
+        // Используется для отрисовки профиля плотины и кривой, чтобы они не рассинхронизировались.
+
+        [ObservableProperty]
+        public partial double DrawH1 { get; set; }
+
+        [ObservableProperty]
+        public partial double DrawM1 { get; set; }
+
+        [ObservableProperty]
+        public partial double DrawL { get; set; }
 
         // ===== Результаты расчёта (чистые числа, форматирование — в XAML) =====
 
@@ -39,6 +59,9 @@ namespace CurveDep.ViewModels
 
         [ObservableProperty]
         public partial double LdValue { get; set; }
+
+        [ObservableProperty]
+        public partial List<CurvePoint> CurvePoints { get; set; } = new();
 
         // ===== Валидация =====
 
@@ -70,6 +93,11 @@ namespace CurveDep.ViewModels
 
             HasError = false;
             ErrorMessage = string.Empty;
+
+            // Фиксируем "снимок" входных данных для согласованной отрисовки
+            DrawH1 = H1;
+            DrawM1 = M1;
+            DrawL = L;
 
             UpdateTableHeaders();
             PerformCalculations();
@@ -241,6 +269,8 @@ namespace CurveDep.ViewModels
                 DeltaLpValue = result.DeltaLp;
                 QValue = result.Q;
                 LdValue = result.Ld;
+
+                CurvePoints = _calculator.BuildCurve(60);
             }
             catch (Exception)
             {
@@ -249,6 +279,7 @@ namespace CurveDep.ViewModels
                 DeltaLpValue = 0;
                 QValue = 0;
                 LdValue = 0;
+                CurvePoints = new();
             }
         }
 
