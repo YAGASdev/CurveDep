@@ -8,7 +8,7 @@
 /// </summary>
 public class DamProfileGeometry
 {
-    private const double CrestWidth = 5.0;      // ширина гребня, м
+    private const double CrestWidth = 10.0;      // ширина гребня, м
     private const double FreeboardRatio = 0.15; // запас высоты гребня над водой, доля от H1
 
     public double H1 { get; set; }

@@ -72,6 +72,17 @@
                                           HeightRequest="400"
                                           WidthRequest="800"/>
 
+            <controls:DamCurveCanvasView x:Name="DamCanvas"
+                                          Grid.Row="3" Grid.Column="3" Grid.RowSpan="4"
+                                          H1="{Binding DrawH1}"
+                                          M1="{Binding DrawM1}"
+                                          L="{Binding DrawL}"
+                                          CurvePoints="{Binding CurvePoints}"
+                                          TablePoints="{Binding TablePoints}"
+                                          SelectedIndex="{Binding SelectedPointIndex}"
+                                          HeightRequest="400"
+                                          WidthRequest="800"/>
+
             <!-- Пустая строка для расстояния -->
             <BoxView Grid.Row="7" Grid.Column="0" Grid.ColumnSpan="4" HeightRequest="20" Color="Transparent"/>
 
@@ -122,50 +133,50 @@
                            BackgroundColor="#9880e5" HorizontalTextAlignment="Center" VerticalTextAlignment="Center"
                            TextColor="{Binding Source={x:Static local:ThemeManager.Instance}, Path=TextColor}"/>
                     <Label Grid.Row="0" Grid.Column="1" Text="{Binding TableHeaders[0]}"
-                           BackgroundColor="#9880e5" HorizontalTextAlignment="Center" VerticalTextAlignment="Center"
+                           BackgroundColor="{Binding TableCellColors[0]}" HorizontalTextAlignment="Center" VerticalTextAlignment="Center"
                            TextColor="{Binding Source={x:Static local:ThemeManager.Instance}, Path=TextColor}"/>
                     <Label Grid.Row="0" Grid.Column="2" Text="{Binding TableHeaders[1]}"
-                           BackgroundColor="#9880e5" HorizontalTextAlignment="Center" VerticalTextAlignment="Center"
+                           BackgroundColor="{Binding TableCellColors[1]}" HorizontalTextAlignment="Center" VerticalTextAlignment="Center"
                            TextColor="{Binding Source={x:Static local:ThemeManager.Instance}, Path=TextColor}"/>
                     <Label Grid.Row="0" Grid.Column="3" Text="{Binding TableHeaders[2]}"
-                           BackgroundColor="#9880e5" HorizontalTextAlignment="Center" VerticalTextAlignment="Center"
+                           BackgroundColor="{Binding TableCellColors[2]}" HorizontalTextAlignment="Center" VerticalTextAlignment="Center"
                            TextColor="{Binding Source={x:Static local:ThemeManager.Instance}, Path=TextColor}"/>
                     <Label Grid.Row="0" Grid.Column="4" Text="{Binding TableHeaders[3]}"
-                           BackgroundColor="#9880e5" HorizontalTextAlignment="Center" VerticalTextAlignment="Center"
+                           BackgroundColor="{Binding TableCellColors[3]}" HorizontalTextAlignment="Center" VerticalTextAlignment="Center"
                            TextColor="{Binding Source={x:Static local:ThemeManager.Instance}, Path=TextColor}"/>
                     <Label Grid.Row="0" Grid.Column="5" Text="{Binding TableHeaders[4]}"
-                           BackgroundColor="#9880e5" HorizontalTextAlignment="Center" VerticalTextAlignment="Center"
+                           BackgroundColor="{Binding TableCellColors[4]}" HorizontalTextAlignment="Center" VerticalTextAlignment="Center"
                            TextColor="{Binding Source={x:Static local:ThemeManager.Instance}, Path=TextColor}"/>
                     <Label Grid.Row="0" Grid.Column="6" Text="{Binding TableHeaders[5]}"
-                           BackgroundColor="#9880e5" HorizontalTextAlignment="Center" VerticalTextAlignment="Center"
+                           BackgroundColor="{Binding TableCellColors[5]}" HorizontalTextAlignment="Center" VerticalTextAlignment="Center"
                            TextColor="{Binding Source={x:Static local:ThemeManager.Instance}, Path=TextColor}"/>
                     <Label Grid.Row="0" Grid.Column="7" Text="{Binding TableHeaders[6]}"
-                           BackgroundColor="#9880e5" HorizontalTextAlignment="Center" VerticalTextAlignment="Center"
+                           BackgroundColor="{Binding TableCellColors[6]}" HorizontalTextAlignment="Center" VerticalTextAlignment="Center"
                            TextColor="{Binding Source={x:Static local:ThemeManager.Instance}, Path=TextColor}"/>
 
                     <Label Grid.Row="1" Grid.Column="0" Text="hₓ, v" FontSize="20"
                            BackgroundColor="#9880e5" HorizontalTextAlignment="Center" VerticalTextAlignment="Center"
                            TextColor="{Binding Source={x:Static local:ThemeManager.Instance}, Path=TextColor}"/>
                     <Label Grid.Row="1" Grid.Column="1" Text="{Binding TableData[0]}"
-                           BackgroundColor="#9880e5" HorizontalTextAlignment="Center" VerticalTextAlignment="Center"
+                           BackgroundColor="{Binding TableCellColors[0]}" HorizontalTextAlignment="Center" VerticalTextAlignment="Center"
                            TextColor="{Binding Source={x:Static local:ThemeManager.Instance}, Path=TextColor}"/>
                     <Label Grid.Row="1" Grid.Column="2" Text="{Binding TableData[1]}"
-                           BackgroundColor="#9880e5" HorizontalTextAlignment="Center" VerticalTextAlignment="Center"
+                           BackgroundColor="{Binding TableCellColors[1]}" HorizontalTextAlignment="Center" VerticalTextAlignment="Center"
                            TextColor="{Binding Source={x:Static local:ThemeManager.Instance}, Path=TextColor}"/>
                     <Label Grid.Row="1" Grid.Column="3" Text="{Binding TableData[2]}"
-                           BackgroundColor="#9880e5" HorizontalTextAlignment="Center" VerticalTextAlignment="Center"
+                           BackgroundColor="{Binding TableCellColors[2]}" HorizontalTextAlignment="Center" VerticalTextAlignment="Center"
                            TextColor="{Binding Source={x:Static local:ThemeManager.Instance}, Path=TextColor}"/>
                     <Label Grid.Row="1" Grid.Column="4" Text="{Binding TableData[3]}"
-                           BackgroundColor="#9880e5" HorizontalTextAlignment="Center" VerticalTextAlignment="Center"
+                           BackgroundColor="{Binding TableCellColors[3]}" HorizontalTextAlignment="Center" VerticalTextAlignment="Center"
                            TextColor="{Binding Source={x:Static local:ThemeManager.Instance}, Path=TextColor}"/>
                     <Label Grid.Row="1" Grid.Column="5" Text="{Binding TableData[4]}"
-                           BackgroundColor="#9880e5" HorizontalTextAlignment="Center" VerticalTextAlignment="Center"
+                           BackgroundColor="{Binding TableCellColors[4]}" HorizontalTextAlignment="Center" VerticalTextAlignment="Center"
                            TextColor="{Binding Source={x:Static local:ThemeManager.Instance}, Path=TextColor}"/>
                     <Label Grid.Row="1" Grid.Column="6" Text="{Binding TableData[5]}"
-                           BackgroundColor="#9880e5" HorizontalTextAlignment="Center" VerticalTextAlignment="Center"
+                           BackgroundColor="{Binding TableCellColors[5]}" HorizontalTextAlignment="Center" VerticalTextAlignment="Center"
                            TextColor="{Binding Source={x:Static local:ThemeManager.Instance}, Path=TextColor}"/>
                     <Label Grid.Row="1" Grid.Column="7" Text="{Binding TableData[6]}"
-                           BackgroundColor="#9880e5" HorizontalTextAlignment="Center" VerticalTextAlignment="Center"
+                           BackgroundColor="{Binding TableCellColors[6]}" HorizontalTextAlignment="Center" VerticalTextAlignment="Center"
                            TextColor="{Binding Source={x:Static local:ThemeManager.Instance}, Path=TextColor}"/>
                 </Grid>
             </Border>

@@ -81,6 +81,31 @@ namespace CurveDep.ViewModels
         public partial string[] TableData { get; set; } =
             new[] { "0.00", "0.00", "0.00", "0.00", "0.00", "0.00", "0.00" };
 
+        [ObservableProperty]
+        public partial int SelectedPointIndex { get; set; } = -1; // -1 = ничего не выбрано
+
+        [ObservableProperty]
+        public partial Color[] TableCellColors { get; set; } = CreateDefaultCellColors();
+
+        [ObservableProperty]
+        public partial List<CurvePoint> TablePoints { get; set; } = new();
+
+        private static Color[] CreateDefaultCellColors() =>
+            Enumerable.Repeat(Color.FromArgb("#9880e5"), 7).ToArray();
+
+        [RelayCommand]
+        private void SelectPoint(int index)
+        {
+            if (index < 0 || index >= 7)
+                return;
+
+            SelectedPointIndex = index;
+
+            var colors = CreateDefaultCellColors();
+            colors[index] = Color.FromArgb("#2196F3");
+            TableCellColors = colors;
+        }
+
         [RelayCommand]
         private void Calculate()
         {
@@ -92,6 +117,8 @@ namespace CurveDep.ViewModels
             }
 
             HasError = false;
+            SelectedPointIndex = -1;
+            TableCellColors = CreateDefaultCellColors();
             ErrorMessage = string.Empty;
 
             // Фиксируем "снимок" входных данных для согласованной отрисовки
@@ -136,122 +163,30 @@ namespace CurveDep.ViewModels
 
         private void UpdateTableHeaders()
         {
-            TableHeaders = GenerateTableValues(L);
+            TableHeaders = GenerateEvenlySpacedValues(L);
         }
 
-        private string[] GenerateTableValues(double lValue)
+        /// <summary>
+        /// Генерирует 7 равномерно распределённых значений X от 0 до L включительно.
+        /// </summary>
+        private string[] GenerateEvenlySpacedValues(double lValue)
         {
-            int lastValue = (int)Math.Floor(lValue);
+            var values = new double[7];
 
-            if (lastValue < 6)
+            for (int i = 0; i < 7; i++)
             {
-                return GenerateTableForSmallValues(lastValue);
+                values[i] = Math.Round(lValue * i / 6.0, 2);
             }
 
-            var values = new HashSet<double> { 0 };
+            // Гарантируем точные границы без погрешностей округления
+            values[0] = 0;
+            values[6] = Math.Round(lValue, 2);
 
-            if (5 <= lastValue) values.Add(5);
-            if (10 <= lastValue) values.Add(10);
-            if (15 <= lastValue) values.Add(15);
-
-            values.Add(lastValue);
-
-            if (lastValue >= 17 && !values.Contains(lastValue - 1))
-            {
-                values.Add(lastValue - 1);
-            }
-
-            int maxIterations = 10;
-            int iteration = 0;
-
-            while (values.Count < 7 && iteration < maxIterations)
-            {
-                iteration++;
-
-                var sortedValues = values.OrderBy(v => v).ToList();
-                double maxGap = 0;
-                int gapIndex = -1;
-
-                for (int i = 0; i < sortedValues.Count - 1; i++)
-                {
-                    double gap = sortedValues[i + 1] - sortedValues[i];
-                    if (gap > maxGap && gap >= 1)
-                    {
-                        maxGap = gap;
-                        gapIndex = i;
-                    }
-                }
-
-                if (gapIndex >= 0)
-                {
-                    double newValue = Math.Round((sortedValues[gapIndex] + sortedValues[gapIndex + 1]) / 2);
-                    if (newValue > sortedValues[gapIndex] && newValue < sortedValues[gapIndex + 1])
-                    {
-                        values.Add(newValue);
-                    }
-                    else
-                    {
-                        break;
-                    }
-                }
-                else
-                {
-                    break;
-                }
-            }
-
-            if (values.Count < 7)
-            {
-                for (int i = 0; i <= lastValue && values.Count < 7; i++)
-                {
-                    values.Add(i);
-                }
-            }
-
-            var result = values.OrderBy(v => v).Take(7).ToList();
-
-            if (result.Count > 0 && result[^1] != lastValue)
-            {
-                result[^1] = lastValue;
-            }
-
-            if (result.Count < 7)
-            {
-                return GenerateTableForSmallValues(lastValue);
-            }
-
-            return result.Select(v => v.ToString("0")).ToArray();
+            return values.Select(FormatTableValue).ToArray();
         }
 
-        private string[] GenerateTableForSmallValues(int lastValue)
-        {
-            var values = new List<double>();
-
-            if (lastValue >= 6)
-            {
-                for (int i = 0; i <= lastValue && values.Count < 7; i++)
-                {
-                    values.Add(i);
-                }
-            }
-            else
-            {
-                double step = lastValue / 6.0;
-                for (int i = 0; i < 7; i++)
-                {
-                    double value = step * i;
-                    value = Math.Round(value, 1);
-                    values.Add(value);
-                }
-
-                if (values.Count > 0)
-                {
-                    values[^1] = lastValue;
-                }
-            }
-
-            return values.Select(v => v % 1 == 0 ? v.ToString("0") : v.ToString("0.0")).ToArray();
-        }
+        private static string FormatTableValue(double v) =>
+            v % 1 == 0 ? v.ToString("0") : v.ToString("0.##", CultureInfo.InvariantCulture);
 
         private void PerformCalculations()
         {
@@ -300,10 +235,15 @@ namespace CurveDep.ViewModels
                 }
 
                 TableData = newTableData;
+                TablePoints = xValues.Select(x => new CurvePoint(
+                    x,
+                    x == 0 ? Math.Round(H1, 2) : _calculator.CalculateHx(x)
+                    )).ToList();
             }
             catch (Exception)
             {
                 TableData = new[] { "0.00", "0.00", "0.00", "0.00", "0.00", "0.00", "0.00" };
+                TablePoints = new();
             }
         }
     }

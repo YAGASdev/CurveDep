@@ -49,11 +49,39 @@ public class DamCurveCanvasView : SKCanvasView
         set => SetValue(CurvePointsProperty, value);
     }
 
-    private readonly List<SKPoint> _screenCurvePoints = new();
+    public static readonly BindableProperty TablePointsProperty =
+        BindableProperty.Create(nameof(TablePoints), typeof(IEnumerable), typeof(DamCurveCanvasView), null,
+            propertyChanged: (b, o, n) => ((DamCurveCanvasView)b).InvalidateSurface());
+
+    public IEnumerable? TablePoints
+    {
+        get => (IEnumerable?)GetValue(TablePointsProperty);
+        set => SetValue(TablePointsProperty, value);
+    }
+
+    public static readonly BindableProperty SelectedIndexProperty =
+        BindableProperty.Create(nameof(SelectedIndex), typeof(int), typeof(DamCurveCanvasView), -1,
+            propertyChanged: (b, o, n) => ((DamCurveCanvasView)b).InvalidateSurface());
+
+    public int SelectedIndex
+    {
+        get => (int)GetValue(SelectedIndexProperty);
+        set => SetValue(SelectedIndexProperty, value);
+    }
+
+    /// <summary>Срабатывает при клике на одну из опорных точек. Параметр — индекс точки (0-6).</summary>
+    public event Action<int>? PointSelected;
+
+    private readonly List<SKPoint> _screenTablePoints = new();
+
+    // Желаемая доля высоты холста, которую должна занимать фигура по вертикали
+    private const double TargetHeightRatio = 0.85;
 
     public DamCurveCanvasView()
     {
         PaintSurface += OnPaintSurface;
+        EnableTouchEvents = true;
+        Touch += OnTouch;
     }
 
     private void OnPaintSurface(object? sender, SKPaintSurfaceEventArgs e)
@@ -71,22 +99,45 @@ public class DamCurveCanvasView : SKCanvasView
         double maxX = contour.Max(p => p.X);
         double maxY = contour.Max(p => p.Y);
 
-        float margin = 50;
+        float margin = 30;
         double modelWidth = maxX - minX;
         double modelHeight = maxY;
 
-        float scaleX = (float)((e.Info.Width - 2 * margin) / modelWidth);
-        float scaleY = (float)((e.Info.Height - 2 * margin) / modelHeight);
-        float scale = Math.Min(scaleX, scaleY);
+        float availableWidth = e.Info.Width - 2 * margin;
+        float availableHeight = e.Info.Height - 2 * margin;
+
+        // Базовый (честный) масштаб по ширине — заполняем всю доступную ширину
+        float scaleX = (float)(availableWidth / modelWidth);
+
+        // Высота фигуры при таком же масштабе по Y (без преувеличения)
+        double naturalDrawnHeight = modelHeight * scaleX;
+
+        // Подбираем коэффициент вертикального преувеличения с шагом 0.5,
+        // чтобы фигура занимала примерно TargetHeightRatio от доступной высоты,
+        // но не выходила за её пределы.
+        double verticalExaggeration = 1.0;
+        if (naturalDrawnHeight > 0)
+        {
+            double raw = (availableHeight * TargetHeightRatio) / naturalDrawnHeight;
+            double stepped = Math.Floor(raw / 0.5) * 0.5;
+            verticalExaggeration = Math.Max(1.0, stepped);
+        }
+
+        float scaleY = (float)(scaleX * verticalExaggeration);
+
+        float drawnWidth = (float)(modelWidth * scaleX);
+        float drawnHeight = (float)(modelHeight * scaleY);
+
+        float offsetX = margin + (availableWidth - drawnWidth) / 2f;
+        float offsetY = margin + (availableHeight - drawnHeight) / 2f;
 
         SKPoint ToScreen(double x, double y) => new(
-            margin + (float)(x - minX) * scale,
-            e.Info.Height - margin - (float)y * scale
+            offsetX + (float)(x - minX) * scaleX,
+            offsetY + drawnHeight - (float)y * scaleY
         );
 
         DrawDamBody(canvas, geometry, contour, ToScreen);
 
-        // Строим путь контура тела плотины ещё раз — для обрезки (clip)
         using var bodyClipPath = new SKPath();
         bodyClipPath.MoveTo(ToScreen(contour[0].X, contour[0].Y));
         for (int i = 1; i < contour.Count; i++)
@@ -94,9 +145,17 @@ public class DamCurveCanvasView : SKCanvasView
         bodyClipPath.Close();
 
         canvas.Save();
-        canvas.ClipPath(bodyClipPath); // всё, что рисуется дальше, обрежется по контуру плотины
+        canvas.ClipPath(bodyClipPath);
         DrawSeepageCurve(canvas, ToScreen);
         canvas.Restore();
+
+        // Точки рисуем поверх, без обрезки — должны быть видны и кликабельны всегда.
+        DrawTablePoints(canvas, ToScreen);
+
+        if (verticalExaggeration > 1.0)
+        {
+            DrawExaggerationLabel(canvas, e.Info, verticalExaggeration);
+        }
     }
 
     private void DrawDamBody(SKCanvas canvas, DamProfileGeometry geometry,
@@ -146,18 +205,17 @@ public class DamCurveCanvasView : SKCanvasView
 
     private void DrawSeepageCurve(SKCanvas canvas, Func<double, double, SKPoint> toScreen)
     {
-        _screenCurvePoints.Clear();
-
         if (CurvePoints == null)
             return;
 
+        var screenPoints = new List<SKPoint>();
         foreach (var obj in CurvePoints)
         {
             if (obj is CurvePoint p)
-                _screenCurvePoints.Add(toScreen(p.X, p.Hx));
+                screenPoints.Add(toScreen(p.X, p.Hx));
         }
 
-        if (_screenCurvePoints.Count < 2)
+        if (screenPoints.Count < 2)
             return;
 
         using var curvePaint = new SKPaint
@@ -169,10 +227,108 @@ public class DamCurveCanvasView : SKCanvasView
         };
 
         using var curvePath = new SKPath();
-        curvePath.MoveTo(_screenCurvePoints[0]);
-        for (int i = 1; i < _screenCurvePoints.Count; i++)
-            curvePath.LineTo(_screenCurvePoints[i]);
+        curvePath.MoveTo(screenPoints[0]);
+        for (int i = 1; i < screenPoints.Count; i++)
+            curvePath.LineTo(screenPoints[i]);
 
         canvas.DrawPath(curvePath, curvePaint);
+    }
+
+    private void DrawTablePoints(SKCanvas canvas, Func<double, double, SKPoint> toScreen)
+    {
+        _screenTablePoints.Clear();
+
+        if (TablePoints == null)
+            return;
+
+        int index = 0;
+        foreach (var obj in TablePoints)
+        {
+            if (obj is CurvePoint p)
+            {
+                var screenPoint = toScreen(p.X, p.Hx);
+                _screenTablePoints.Add(screenPoint);
+
+                bool isSelected = index == SelectedIndex;
+
+                using var pointPaint = new SKPaint
+                {
+                    Color = isSelected ? new SKColor(0x21, 0x96, 0xF3) : SKColors.OrangeRed,
+                    Style = SKPaintStyle.Fill,
+                    IsAntialias = true
+                };
+                canvas.DrawCircle(screenPoint, isSelected ? 8 : 5, pointPaint);
+
+                using var outlinePaint = new SKPaint
+                {
+                    Color = SKColors.Black,
+                    Style = SKPaintStyle.Stroke,
+                    StrokeWidth = 1,
+                    IsAntialias = true
+                };
+                canvas.DrawCircle(screenPoint, isSelected ? 8 : 5, outlinePaint);
+            }
+            index++;
+        }
+    }
+
+    private void DrawExaggerationLabel(SKCanvas canvas, SKImageInfo info, double factor)
+    {
+        using var font = new SKFont(SKTypeface.Default, 14);
+        using var textPaint = new SKPaint
+        {
+            Color = SKColors.Black,
+            IsAntialias = true
+        };
+
+        string ratio = FormatAsRatio(factor);
+        string text = $"Верт. масштаб {ratio}";
+        canvas.DrawText(text, 10, info.Height - 10, font, textPaint);
+    }
+
+    /// <summary>
+    /// Преобразует коэффициент (кратный 0.5) в инженерную запись отношения,
+    /// например 1.5 -> "3:2", 2.0 -> "2:1", 2.5 -> "5:2".
+    /// </summary>
+    private static string FormatAsRatio(double factor)
+    {
+        // Приводим к дроби со знаменателем 2 (т.к. шаг 0.5)
+        int numerator = (int)Math.Round(factor * 2);
+        int denominator = 2;
+
+        // Сокращаем дробь, если возможно (например, 4/2 -> 2/1)
+        int gcd = Gcd(numerator, denominator);
+        numerator /= gcd;
+        denominator /= gcd;
+
+        return $"{numerator}:{denominator}";
+    }
+
+    private static int Gcd(int a, int b) => b == 0 ? a : Gcd(b, a % b);
+
+    private void OnTouch(object? sender, SKTouchEventArgs e)
+    {
+        if (e.ActionType == SKTouchAction.Pressed)
+        {
+            const float hitRadius = 15f;
+
+            for (int i = 0; i < _screenTablePoints.Count; i++)
+            {
+                if (Distance(_screenTablePoints[i], e.Location) <= hitRadius)
+                {
+                    PointSelected?.Invoke(i);
+                    break;
+                }
+            }
+        }
+
+        e.Handled = true;
+    }
+
+    private static float Distance(SKPoint a, SKPoint b)
+    {
+        float dx = a.X - b.X;
+        float dy = a.Y - b.Y;
+        return MathF.Sqrt(dx * dx + dy * dy);
     }
 }

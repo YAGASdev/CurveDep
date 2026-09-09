@@ -8,7 +8,15 @@ namespace CurveDep
         public MainPage()
         {
             InitializeComponent();
-            BindingContext = new MVM();
+            DamCanvas.PointSelected += OnDamCanvasPointSelected;
+        }
+
+        private void OnDamCanvasPointSelected(int index)
+        {
+            if (BindingContext is MVM vm)
+            {
+                vm.SelectPointCommand.Execute(index);
+            }
         }
 
         private void OnThemeToggleClicked(object sender, System.EventArgs e)
